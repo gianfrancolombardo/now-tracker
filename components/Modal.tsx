@@ -20,10 +20,10 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="glass-panel bg-gray-900/80 rounded-[2rem] w-full max-w-lg shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh] border border-white/10">
-        <div className="flex items-center justify-between p-6 border-b border-white/5">
-          <h2 className="text-xl font-bold text-gray-100">{title}</h2>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-black/60 backdrop-blur-md animate-fade-in">
+      <div className="glass-panel-active bg-gray-900/60 rounded-[2.5rem] w-full max-w-lg shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden animate-slide-up flex flex-col max-h-[85vh] border border-white/20">
+        <div className="flex items-center justify-between p-6 border-b border-white/10">
+          <h2 className="text-xl font-bold text-white tracking-wide">{title}</h2>
           <button 
             onClick={onClose}
             className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white"

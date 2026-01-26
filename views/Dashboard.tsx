@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Zap, Play } from 'lucide-react';
+import { Plus, Pencil, Zap } from 'lucide-react';
 import { useTime } from '../context/TimeContext';
 import { ProjectModal } from '../components/ProjectModal';
 import { formatDuration } from '../utils';
@@ -55,31 +55,23 @@ export const Dashboard: React.FC = () => {
               key={project.id}
               onClick={() => toggleProject(project.id)}
               className={`
-                group relative flex flex-col items-center justify-between p-5 h-44 rounded-[2rem] transition-all duration-500
-                glass-panel
-                ${isActive 
-                  ? 'border-t border-l border-white/20 shadow-2xl z-10' 
-                  : 'hover:bg-gray-800/30 hover:border-white/10 active:scale-95'
-                }
+                group relative flex flex-col items-center justify-between p-5 h-44 rounded-[2.5rem] transition-all duration-500
+                ${isActive ? 'glass-panel-active transform scale-[1.02] z-10' : 'glass-panel hover:bg-white/5 active:scale-95'}
               `}
               style={{
-                background: isActive ? `linear-gradient(145deg, ${project.color}15, rgba(0,0,0,0))` : undefined,
-                borderColor: isActive ? `${project.color}50` : undefined,
-                boxShadow: isActive ? `0 0 30px -10px ${project.color}30, inset 0 0 20px ${project.color}10` : undefined
+                borderColor: isActive ? `${project.color}60` : undefined,
+                boxShadow: isActive ? `0 0 40px -10px ${project.color}40, inset 0 0 20px ${project.color}10` : undefined
               }}
             >
               {/* Header / Edit Action */}
-              <div className="w-full flex justify-between items-start h-6">
-                 {/* Empty left side for balance or future indicator */}
+              <div className="w-full flex justify-between items-start h-6 relative z-20">
                  <div className="w-6"></div>
-                 
-                 {/* Right Side: Active Dot or Edit Button */}
                  {isActive ? (
-                    <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_10px_white] mt-1"></div>
+                    <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_15px_white] mt-1"></div>
                  ) : (
                     <div 
                       onClick={(e) => handleEditClick(e, project)}
-                      className="p-2 -mr-2 -mt-2 text-gray-600 hover:text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-white/10"
+                      className="p-2 -mr-2 -mt-2 text-gray-500 hover:text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-white/10"
                     >
                       <Pencil size={14} />
                     </div>
@@ -87,13 +79,13 @@ export const Dashboard: React.FC = () => {
               </div>
 
               {/* Icon */}
-              <div className={`text-5xl transition-transform duration-500 drop-shadow-2xl ${isActive ? 'scale-110 animate-bounce-small' : 'group-hover:scale-110 opacity-70 group-hover:opacity-100'}`}>
+              <div className={`text-6xl transition-transform duration-500 drop-shadow-2xl ${isActive ? 'scale-110 animate-bounce-small' : 'group-hover:scale-110 opacity-80 group-hover:opacity-100'}`}>
                 {project.emoji}
               </div>
               
               {/* Label */}
-              <div className="w-full text-center">
-                 <span className={`text-base font-bold tracking-wide transition-colors duration-300 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-200'}`}>
+              <div className="w-full text-center relative z-20">
+                 <span className={`text-sm font-bold tracking-widest uppercase transition-colors duration-300 ${isActive ? 'text-white drop-shadow-md' : 'text-gray-400 group-hover:text-gray-200'}`}>
                     {project.name}
                  </span>
               </div>
@@ -103,45 +95,39 @@ export const Dashboard: React.FC = () => {
 
         <button
           onClick={handleAddNew}
-          className="flex flex-col items-center justify-center h-44 rounded-[2rem] border border-dashed border-gray-800 text-gray-600 hover:text-brand-400 hover:border-brand-500/30 hover:bg-brand-500/5 transition-all duration-300 active:scale-95 group"
+          className="flex flex-col items-center justify-center h-44 rounded-[2.5rem] border border-dashed border-white/10 text-gray-500 hover:text-brand-400 hover:border-brand-500/40 hover:bg-brand-500/5 transition-all duration-300 active:scale-95 group glass-panel"
         >
-          <div className="p-4 rounded-full bg-gray-900 group-hover:bg-gray-800 transition-colors mb-2 shadow-inner">
+          <div className="p-4 rounded-full bg-white/5 group-hover:bg-white/10 transition-colors mb-2 shadow-inner border border-white/5">
             <Plus size={24} />
           </div>
-          <span className="font-medium text-xs uppercase tracking-widest opacity-60 group-hover:opacity-100">Add Project</span>
+          <span className="font-bold text-[10px] uppercase tracking-widest opacity-60 group-hover:opacity-100">Add Project</span>
         </button>
       </div>
 
-      {/* Active Timer - HUD Style */}
-      <div className={`absolute bottom-24 left-0 right-0 z-30 transition-all duration-700 cubic-bezier(0.34, 1.56, 0.64, 1) ${activeProject ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+      {/* Active Timer - Ultra Glass HUD Style */}
+      <div className={`absolute bottom-24 left-0 right-0 z-30 transition-all duration-700 cubic-bezier(0.34, 1.56, 0.64, 1) ${activeProject ? 'translate-y-0 opacity-100 blur-none' : 'translate-y-20 opacity-0 blur-sm pointer-events-none'}`}>
         {activeProject && (
           <div className="mx-4 relative group">
              {/* Main Glass Panel */}
-             <div className="glass-panel rounded-[2.5rem] p-6 shadow-2xl relative overflow-hidden backdrop-blur-2xl">
+             <div className="glass-panel-active rounded-[3rem] p-8 shadow-[0_10px_50px_-10px_rgba(0,0,0,0.5)] relative overflow-hidden backdrop-blur-3xl border border-white/20">
                  
-                 {/* Background Glow */}
-                 <div 
-                    className="absolute inset-0 opacity-20 transition-opacity duration-1000 animate-pulse-slow" 
-                    style={{ background: `radial-gradient(circle at 50% 120%, ${activeProject.color}, transparent 60%)` }}
-                 />
-
                  <div className="relative z-10 flex flex-col items-center">
                     {/* Project Label */}
-                    <div className="flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-black/20 border border-white/5">
-                        <span className="text-sm">{activeProject.emoji}</span>
-                        <span className="text-[10px] font-bold text-gray-300 uppercase tracking-[0.2em]">{activeProject.name}</span>
+                    <div className="flex items-center gap-2 mb-1 px-4 py-1.5 rounded-full bg-black/20 border border-white/10 backdrop-blur-md shadow-inner">
+                        <span className="text-base">{activeProject.emoji}</span>
+                        <span className="text-[10px] font-black text-gray-200 uppercase tracking-[0.25em]">{activeProject.name}</span>
                     </div>
 
                     {/* Digital Time */}
                     <div 
-                      className="text-7xl font-mono font-medium tracking-tighter text-white tabular-nums leading-[0.9] drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                      className="text-[5.5rem] font-mono font-medium tracking-tighter text-white tabular-nums leading-[0.9] drop-shadow-[0_0_25px_rgba(255,255,255,0.4)] my-2"
                     >
                       {formatDuration(elapsed)}
                     </div>
                     
                     {/* Status Indicator */}
-                    <div className="mt-3 text-[10px] font-bold text-brand-400 flex items-center gap-2 uppercase tracking-widest opacity-80">
-                         <Zap size={10} className="fill-brand-400" /> Current Session
+                    <div className="mt-1 text-[10px] font-bold text-white/80 flex items-center gap-2 uppercase tracking-[0.3em] animate-pulse">
+                         <Zap size={10} className="fill-white" /> Focus Mode
                     </div>
                  </div>
 
