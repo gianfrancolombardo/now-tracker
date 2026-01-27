@@ -1,6 +1,6 @@
 {
-    "name": "FlowState Tracker",
-    "short_name": "FlowState",
+    "name": "Now Tracker",
+    "short_name": "Now Tracker",
     "description": "Minimalist Productivity Tracker",
     "start_url": "/",
     "display": "standalone",
