@@ -1,0 +1,23 @@
+{
+    "name": "FlowState Tracker",
+    "short_name": "FlowState",
+    "description": "Minimalist Productivity Tracker",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#050508",
+    "theme_color": "#0ea5e9",
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/apple-touch-icon.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
