@@ -4,6 +4,7 @@ export interface Project {
   emoji: string;
   color: string; // Tailwind bg class or hex
   isArchived?: boolean; // Soft delete flag
+  userId?: string;
 }
 
 export interface Session {
@@ -11,6 +12,7 @@ export interface Session {
   projectId: string;
   startTime: number; // Timestamp
   endTime: number | null; // Null implies currently active
+  userId?: string;
 }
 
 export type ViewState = 'dashboard' | 'timeline' | 'reports';

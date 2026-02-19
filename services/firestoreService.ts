@@ -1,4 +1,4 @@
-import { collection, getDocs, setDoc, doc, deleteDoc, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, setDoc, doc, deleteDoc, query, orderBy, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Project, Session } from "../types";
 
@@ -7,8 +7,9 @@ const SESSIONS_COLLECTION = "sessions";
 
 export const firestoreService = {
     // Projects
-    async getProjects(): Promise<Project[]> {
-        const querySnapshot = await getDocs(collection(db, PROJECTS_COLLECTION));
+    async getProjects(userId: string): Promise<Project[]> {
+        const q = query(collection(db, PROJECTS_COLLECTION), where("userId", "==", userId));
+        const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map(doc => doc.data() as Project);
     },
 
@@ -21,10 +22,15 @@ export const firestoreService = {
     },
 
     // Sessions
-    async getSessions(): Promise<Session[]> {
-        const q = query(collection(db, SESSIONS_COLLECTION), orderBy("startTime", "desc"));
+    async getSessions(userId: string): Promise<Session[]> {
+        const q = query(
+            collection(db, SESSIONS_COLLECTION),
+            where("userId", "==", userId)
+        );
         const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => doc.data() as Session);
+        return querySnapshot.docs
+            .map(doc => doc.data() as Session)
+            .sort((a, b) => b.startTime - a.startTime);
     },
 
     async saveSession(session: Session): Promise<void> {

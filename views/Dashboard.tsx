@@ -29,8 +29,24 @@ export const Dashboard: React.FC = () => {
   const activeSession = sessions.find(s => s.id === activeSessionId);
   const activeProject = projects.find(p => p.id === activeSession?.projectId);
 
-  // Only show active (non-archived) projects
-  const visibleProjects = projects.filter(p => !p.isArchived);
+  // Calculate durations for sorting
+  const projectDurations = React.useMemo(() => {
+    const durations: Record<string, number> = {};
+    sessions.forEach(session => {
+      const duration = (session.endTime || Date.now()) - session.startTime;
+      durations[session.projectId] = (durations[session.projectId] || 0) + duration;
+    });
+    return durations;
+  }, [sessions]);
+
+  // Only show active (non-archived) projects, sorted by usage
+  const visibleProjects = projects
+    .filter(p => !p.isArchived)
+    .sort((a, b) => {
+      const durationA = projectDurations[a.id] || 0;
+      const durationB = projectDurations[b.id] || 0;
+      return durationB - durationA;
+    });
 
   const handleEditClick = (e: React.MouseEvent, project: Project) => {
     e.stopPropagation();
@@ -51,7 +67,7 @@ export const Dashboard: React.FC = () => {
         {visibleProjects.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6">
             <div className="relative mb-8">
-              <div className="absolute inset-0 bg-brand-500/20 blur-[100px] rounded-full scale-150"></div>
+              <div className="absolute inset-0 bg-brand-500/20 blur-[100px] rounded-full scale-150 hidden md:block"></div>
               <div className="relative glass-panel-active p-10 rounded-[3rem] border border-white/10 shadow-2xl">
                 <Zap size={64} className="text-brand-400 fill-brand-400/20 animate-pulse-slow" />
               </div>
@@ -72,7 +88,7 @@ export const Dashboard: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 content-start">
+          <div className={`grid gap-4 content-start transition-all duration-500 ${visibleProjects.length > 5 ? 'grid-cols-3' : 'grid-cols-2'}`}>
             {visibleProjects.map((project, index) => {
               const isActive = project.id === activeProject?.id;
 
@@ -156,7 +172,7 @@ export const Dashboard: React.FC = () => {
             ></div>
 
             {/* Main Glass Panel */}
-            <div className="glass-panel-active rounded-[3.5rem] p-8 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.6)] relative overflow-hidden backdrop-blur-3xl border border-white/20">
+            <div className="glass-panel-active rounded-[3.5rem] p-8 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.6)] relative overflow-hidden md:backdrop-blur-3xl backdrop-blur-none border border-white/20">
 
               <div className="relative z-10 flex flex-col items-center">
                 {/* Project Label */}
@@ -170,7 +186,7 @@ export const Dashboard: React.FC = () => {
 
                 {/* Digital Time */}
                 <div
-                  className="text-[6rem] font-mono font-medium tracking-tighter text-white tabular-nums leading-[0.8] drop-shadow-[0_0_30px_rgba(255,255,255,0.4)] my-4 transition-all duration-500"
+                  className={`font-mono font-medium tracking-tighter text-white tabular-nums leading-[0.8] drop-shadow-[0_0_30px_rgba(255,255,255,0.4)] my-4 transition-all duration-500 ${formatDuration(elapsed).length > 5 ? 'text-[4rem]' : 'text-[6rem]'}`}
                 >
                   {formatDuration(elapsed)}
                 </div>

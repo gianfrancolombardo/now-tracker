@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { Project, Session, TimeContextType } from '../types';
 import { generateId } from '../utils';
 import { firestoreService } from '../services/firestoreService';
+import { useAuth } from './AuthContext';
+// Note: AuthContext checks seem to indicate valid user for app content, but TimeProvider needs to handle it too.
 
 const TimeContext = createContext<TimeContextType | undefined>(undefined);
 
@@ -17,6 +19,7 @@ export const useTime = () => {
 const DEFAULT_PROJECTS: Project[] = [];
 
 export const TimeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -24,12 +27,19 @@ export const TimeProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initial load from Firestore
   useEffect(() => {
+    if (!user) {
+      setProjects([]);
+      setSessions([]);
+      setLoading(false);
+      return;
+    }
+
     const loadData = async () => {
-      console.log("Starting data load from Firestore...");
+      console.log("Starting data load from Firestore for user:", user.uid);
       try {
         const [fetchedProjects, fetchedSessions] = await Promise.all([
-          firestoreService.getProjects(),
-          firestoreService.getSessions()
+          firestoreService.getProjects(user.uid),
+          firestoreService.getSessions(user.uid)
         ]);
         console.log("Fetched projects:", fetchedProjects.length);
         console.log("Fetched sessions:", fetchedSessions.length);
@@ -37,6 +47,7 @@ export const TimeProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProjects(fetchedProjects);
         setSessions(fetchedSessions);
 
+        // Logic to find active session might need to ensure it belongs to user, but query already filters.
         const active = fetchedSessions.find(s => s.endTime === null);
         if (active) {
           console.log("Active session found:", active.id);
@@ -44,7 +55,6 @@ export const TimeProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (error: any) {
         console.error("FATAL Firestore Error:", error);
-        // Fallback to defaults on error to avoid white screen
         setProjects(DEFAULT_PROJECTS);
       } finally {
         console.log("Loading state set to false");
@@ -53,10 +63,11 @@ export const TimeProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     loadData();
-  }, []);
+  }, [user]);
 
   const addProject = async (project: Omit<Project, 'id'>) => {
-    const newProject = { ...project, id: generateId(), isArchived: false };
+    if (!user) return;
+    const newProject = { ...project, id: generateId(), isArchived: false, userId: user.uid };
     setProjects(prev => [...prev, newProject]);
     await firestoreService.saveProject(newProject);
   };
@@ -126,20 +137,21 @@ export const TimeProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // We need to wait for the next tick or just rely on the facts we know.
     if (currentActive) {
-      await firestoreService.saveSession({ ...currentActive, endTime: now });
+      await firestoreService.saveSession({ ...currentActive, endTime: now }); // userId is already in currentActive
       if (currentActive.projectId === projectId) return;
     }
 
+    if (!user) return;
+
     const newSession: Session = {
-      id: generateId(), // This id might differ from the one in setSessions if we are not careful
-      // But we can't easily sync them without refactoring more.
-      // Let's refactor toggleProject to be more predictable.
+      id: generateId(),
       projectId,
       startTime: now,
       endTime: null,
+      userId: user.uid
     };
     // Re-evaluating toggleProject...
-  }, [activeSessionId, sessions]);
+  }, [activeSessionId, sessions, user]);
 
   // Better toggleProject implementation to avoid ID mismatch and handle async properly
   const toggleProjectStable = useCallback(async (projectId: string) => {
@@ -157,17 +169,20 @@ export const TimeProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
+    if (!user) return;
+
     const newSession: Session = {
       id: generateId(),
       projectId,
       startTime: now,
       endTime: null,
+      userId: user.uid
     };
 
     setSessions(prev => [...prev, newSession]);
     setActiveSessionId(newSession.id);
     await firestoreService.saveSession(newSession);
-  }, [sessions]);
+  }, [sessions, user]);
 
   const updateSession = async (sessionId: string, updates: Partial<Session>) => {
     const updatedSessions = sessions.map(s => s.id === sessionId ? { ...s, ...updates } : s);
